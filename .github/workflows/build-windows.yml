@@ -1,0 +1,47 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./geo_client2
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: geo_client2/frontend/pnpm-lock.yaml
+
+      - name: Install Wails CLI v2.15.0
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
+
+      - name: Install frontend dependencies
+        run: cd frontend ; pnpm install
+
+      - name: Build Wails exe
+        run: wails build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 端界GEO-Windows
+          path: geo_client2/build/bin/*.exe
