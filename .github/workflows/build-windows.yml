@@ -28,11 +28,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
-          cache-dependency-path: geo_client2/frontend/pnpm-lock.yaml
 
       - name: Install Wails CLI v2.15.0
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
+
+      - name: Generate wailsjs module & copy to src
+        run: |
+          wails generate module
+          Copy-Item -Path ./wailsjs -Destination ./frontend/src/wailsjs -Recurse -Force
 
       - name: Install frontend dependencies
         run: cd frontend ; pnpm install
